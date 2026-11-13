@@ -40,8 +40,7 @@ class ReSpeakerDirectionSource(DirectionSource):
             state.set_device("respeaker", True)
             while not stop.is_set():
                 reading = device.read()
-                # VAD is binary; audio RMS will replace this estimated display level.
-                state.update(reading.angle, reading.voice, 0.75 if reading.voice else 0.02)
+                state.update_direction(reading.angle, reading.voice)
                 sleep(0.12)
         except Exception as exc:
             state.set_device("respeaker", False, f"{type(exc).__name__}: {exc}")

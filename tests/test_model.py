@@ -18,3 +18,17 @@ def test_device_status() -> None:
     assert snapshot["connected"] is True
     assert snapshot["error"] is None
 
+
+def test_audio_and_recording_state() -> None:
+    state = RadarState()
+    state.update_level(0.42, -37.2)
+    state.set_audio(True)
+    state.set_recording(True)
+    state.add_recording("voice.wav", 1.25, 40044)
+    snapshot = state.snapshot()
+    assert snapshot["level"] == 0.42
+    assert snapshot["dbfs"] == -37.2
+    assert snapshot["audio_connected"] is True
+    assert snapshot["recording"] is True
+    assert snapshot["recordings"][0]["filename"] == "voice.wav"
+

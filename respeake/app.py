@@ -11,8 +11,10 @@ from urllib.parse import urlparse
 
 from .model import RadarState
 from .sources import MockDirectionSource, ReSpeakerDirectionSource
+from .audio import AudioCapture
 
 WEB_ROOT = Path(__file__).with_name("web")
+PROJECT_ROOT = WEB_ROOT.parent.parent
 
 
 class RadarHandler(BaseHTTPRequestHandler):
@@ -32,6 +34,9 @@ class RadarHandler(BaseHTTPRequestHandler):
                     "error": snapshot["error"],
                 }
             )
+            return
+        if path == "/api/recordings":
+            self._send_json({"recordings": self.state.snapshot()["recordings"]})
             return
 
         relative = "index.html" if path == "/" else path.lstrip("/")
@@ -64,6 +69,8 @@ def main() -> None:
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--source", choices=("auto", "hardware", "mock"), default="auto")
+    parser.add_argument("--no-audio", action="store_true", help="disable ALSA capture and WAV segments")
+    parser.add_argument("--recordings-dir", type=Path, default=PROJECT_ROOT / "recordings")
     args = parser.parse_args()
 
     state = RadarState()
@@ -72,6 +79,13 @@ def main() -> None:
     source = choose_source(args.source)
     source_thread = Thread(target=source.run, args=(state, stop), daemon=True)
     source_thread.start()
+    if isinstance(source, ReSpeakerDirectionSource) and not args.no_audio:
+        audio_thread = Thread(
+            target=AudioCapture(args.recordings_dir).run,
+            args=(state, stop),
+            daemon=True,
+        )
+        audio_thread.start()
 
     server = ThreadingHTTPServer((args.host, args.port), RadarHandler)
     print(f"reSpeake is running at http://{args.host}:{args.port}")

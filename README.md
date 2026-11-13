@@ -13,6 +13,10 @@
 - 最近声源方向轨迹
 - 自动发现 `2886:0018` ReSpeaker，读取真实 DOA/VAD
 - LED 环自动进入 VAD/DOA 跟随模式
+- 六通道 ALSA 采集并提取 DSP 处理后的 Channel 0
+- 真实 RMS / dBFS 音量显示
+- VAD 自动分段并在本地保存单声道 WAV
+- 网页语音时间线
 - 无硬件也能运行的模拟模式
 - 为 ReSpeaker 硬件接入预留统一接口
 - 零 Web 框架依赖，Python 标准库即可启动
@@ -38,6 +42,9 @@ python -m pip install -e '.[hardware]'
 python -m respeake.app --source hardware
 ```
 
+自动录音保存在本地 `recordings/`，该目录已加入 `.gitignore`，不会上传到公开仓库。
+可使用 `--no-audio` 禁用音频采集，或通过 `--recordings-dir` 修改保存目录。
+
 Linux 用户如果遇到 `Access denied`，安装仓库提供的 udev 规则：
 
 ```bash
@@ -56,7 +63,7 @@ sudo udevadm trigger --subsystem-match=usb --attr-match=idVendor=2886
 
 - [x] ReSpeaker DOA/VAD USB 驱动
 - [x] 12 颗 RGB LED 与雷达方向同步
-- [ ] 音量与语音活动时间线
+- [x] 音量与语音活动时间线
 - [ ] 本地唤醒词
 - [ ] Whisper 转写
 - [ ] 摄像头人物与声源方向匹配
