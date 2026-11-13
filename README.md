@@ -11,6 +11,8 @@
 - 浏览器中的 360° 声源雷达
 - 实时显示 DOA 方向与 VAD 状态
 - 最近声源方向轨迹
+- 自动发现 `2886:0018` ReSpeaker，读取真实 DOA/VAD
+- LED 环自动进入 VAD/DOA 跟随模式
 - 无硬件也能运行的模拟模式
 - 为 ReSpeaker 硬件接入预留统一接口
 - 零 Web 框架依赖，Python 标准库即可启动
@@ -21,7 +23,7 @@
 python -m respeake.app
 ```
 
-打开 <http://127.0.0.1:8765>。默认使用模拟数据，移动页面上的角度滑块即可测试。
+打开 <http://127.0.0.1:8765>。程序会自动连接 ReSpeaker；未发现设备时回退到模拟数据。
 
 指定监听地址或端口：
 
@@ -29,10 +31,22 @@ python -m respeake.app
 python -m respeake.app --host 0.0.0.0 --port 9000
 ```
 
-## 接入真实 ReSpeaker
+安装硬件依赖并强制使用真实设备：
 
-当前版本先把 UI、事件模型和设备抽象跑通。下一步将接入 Seeed 的
-`usb_4_mic_array` Python 3 驱动，读取 `DOAANGLE` 与 VAD，并同步控制 LED 环。
+```bash
+python -m pip install -e '.[hardware]'
+python -m respeake.app --source hardware
+```
+
+Linux 用户如果遇到 `Access denied`，安装仓库提供的 udev 规则：
+
+```bash
+sudo install -m 0644 config/60-respeaker.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules
+sudo udevadm trigger --subsystem-match=usb --attr-match=idVendor=2886
+```
+
+重新插拔设备后再运行。不要长期用 root 运行网页服务。
 
 硬件资料：<https://wiki.seeedstudio.com/ReSpeaker-USB-Mic-Array/>
 
@@ -40,8 +54,8 @@ python -m respeake.app --host 0.0.0.0 --port 9000
 
 ## 路线图
 
-- [ ] ReSpeaker DOA/VAD USB 驱动
-- [ ] 12 颗 RGB LED 与雷达方向同步
+- [x] ReSpeaker DOA/VAD USB 驱动
+- [x] 12 颗 RGB LED 与雷达方向同步
 - [ ] 音量与语音活动时间线
 - [ ] 本地唤醒词
 - [ ] Whisper 转写

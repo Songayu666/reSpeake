@@ -1,0 +1,3 @@
+# ReSpeaker USB Mic Array: grant the active local desktop session access.
+SUBSYSTEM=="usb", ATTR{idVendor}=="2886", ATTR{idProduct}=="0018", TAG+="uaccess"
+

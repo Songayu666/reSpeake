@@ -10,7 +10,7 @@ from threading import Event, Thread
 from urllib.parse import urlparse
 
 from .model import RadarState
-from .sources import MockDirectionSource
+from .sources import MockDirectionSource, ReSpeakerDirectionSource
 
 WEB_ROOT = Path(__file__).with_name("web")
 
@@ -24,7 +24,14 @@ class RadarHandler(BaseHTTPRequestHandler):
             self._send_json(self.state.snapshot())
             return
         if path == "/api/health":
-            self._send_json({"status": "ok", "source": "mock"})
+            snapshot = self.state.snapshot()
+            self._send_json(
+                {
+                    "status": "ok" if snapshot["connected"] else "degraded",
+                    "source": snapshot["source"],
+                    "error": snapshot["error"],
+                }
+            )
             return
 
         relative = "index.html" if path == "/" else path.lstrip("/")
@@ -56,12 +63,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="ReSpeaker 360-degree sound radar")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
+    parser.add_argument("--source", choices=("auto", "hardware", "mock"), default="auto")
     args = parser.parse_args()
 
     state = RadarState()
     stop = Event()
     RadarHandler.state = state
-    source_thread = Thread(target=MockDirectionSource().run, args=(state, stop), daemon=True)
+    source = choose_source(args.source)
+    source_thread = Thread(target=source.run, args=(state, stop), daemon=True)
     source_thread.start()
 
     server = ThreadingHTTPServer((args.host, args.port), RadarHandler)
@@ -73,6 +82,22 @@ def main() -> None:
     finally:
         stop.set()
         server.server_close()
+
+
+def choose_source(requested: str):
+    if requested == "mock":
+        return MockDirectionSource()
+    if requested == "hardware":
+        return ReSpeakerDirectionSource()
+    try:
+        from .hardware import ReSpeakerUSB
+
+        device = ReSpeakerUSB.find()
+        device.close()
+        return ReSpeakerDirectionSource()
+    except Exception as exc:
+        print(f"ReSpeaker unavailable ({exc}); using mock source")
+        return MockDirectionSource()
 
 
 if __name__ == "__main__":
