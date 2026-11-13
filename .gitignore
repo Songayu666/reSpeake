@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.repo-git/
+.pytest_cache/
+dist/
+build/
+

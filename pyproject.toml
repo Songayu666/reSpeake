@@ -1,0 +1,26 @@
+[project]
+name = "respeake"
+version = "0.1.0"
+description = "A playful 360-degree sound direction radar for the ReSpeaker USB Mic Array"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "reSpeake contributors" }]
+
+[project.optional-dependencies]
+hardware = ["pyusb>=1.2"]
+dev = ["pytest>=8"]
+
+[project.scripts]
+respeake = "respeake.app:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["respeake*"]
+
+[tool.setuptools.package-data]
+respeake = ["web/*"]
+

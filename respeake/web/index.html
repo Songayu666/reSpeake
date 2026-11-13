@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>reSpeake · 声音方向雷达</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <div><span class="eyebrow">RESPEAKER LAB</span><h1>声音方向雷达</h1></div>
+      <div id="status" class="status"><i></i> 模拟设备在线</div>
+    </header>
+    <section class="dashboard">
+      <div class="radar-card">
+        <div id="radar" class="radar">
+          <span class="axis north">0°</span><span class="axis east">90°</span>
+          <span class="axis south">180°</span><span class="axis west">270°</span>
+          <div class="sweep"></div><div id="beam" class="beam"></div>
+          <div class="core"><span id="angle">000°</span><small>DOA</small></div>
+        </div>
+      </div>
+      <aside>
+        <article><label>语音活动</label><strong id="voice">安静</strong><div id="voiceDot" class="voice-dot"></div></article>
+        <article><label>输入强度</label><strong id="levelText">0%</strong><div class="meter"><span id="meter"></span></div></article>
+        <article><label>最近方向</label><div id="history" class="history"></div></article>
+      </aside>
+    </section>
+    <footer>说话时，雷达会锁定声源方向 · 当前为无需硬件的演示模式</footer>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
+
